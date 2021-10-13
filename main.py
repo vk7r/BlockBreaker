@@ -1,6 +1,13 @@
 import pygame
 import random
 
+# Spelets gång är för tillfälligt enformigt och följer samma mönster
+# På ett sätt kan det fixas genom att ta en slumpmässig färdriktning i början
+
+# skapa position tple för x och y pos. tex
+# x = tpl[0]
+# y = tpl[1]
+# pos = (x, y) 
 
 # Initialize pygame ####################################################################################################
 pygame.init()
@@ -73,12 +80,13 @@ def update_blocks(lst_of_blocks, removed_blocks):
     """ Checks and updates changes about the blocks """
 
     #DELETES BROKEN BLOCKS
-    for tpl in removed_blocks: # SER UT ATT TA BORT OÖNSKADE BLOCKS
+    for tpl in removed_blocks:
         for block_info in lst_of_blocks:
-            if tpl[0] in block_info and tpl[1] in block_info:
+            if tpl[0] == block_info[1] and tpl[1] == block_info[2]:
                 lst_of_blocks.remove(block_info) # removes block
 
 
+def draw_blocks(lst_of_blocks):
     for block in lst_of_blocks:
         draw_rect(block[0], block[1], block[2], block[3], block[4])
         # indx: 0 = RGB, 1 = x_pos, 2 = y_pos, 3 = block_w, 4 = block_h
@@ -94,7 +102,15 @@ def block_pos_list(lst):
         pos_lst.append(pos_tpl)
     return pos_lst
 
-# Game engine ##########################################################################################################
+def touching_block(x_pos, y_pos, ball_x, ball_y):
+    # behöver nt ta in blockets egenskaper då de ska vara detsamma över hela programmet
+    blck_w = window_x // 10
+    blck_h = window_y // 20
+
+    return (x_pos) <= ball_x <= (x_pos + blck_w) and y_pos <= ball_y <= (y_pos + blck_h)
+        
+
+# Game engine ######################################################################################
 
 # FPS
 FPS = 60
@@ -102,7 +118,7 @@ FPS = 60
 # TEXT
 myfont = pygame.font.SysFont('Comic Sans MS', 50)
 game_over_txt = myfont.render('GAME OVER', True, WHITE)
-
+you_win_txt = myfont.render("YOU WIN!", True, WHITE)
 
 
 # WALLS
@@ -184,7 +200,7 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
             ball_ypos += ball_speed
             GO_UP = False
         # COLLISION WITH PLATFORM
-        if  (platform_x_pos - platform_w) <= ball_xpos <= (platform_x_pos + platform_w) and (platform_start_posy) <= ball_bot_side <= (platform_start_posy + platform_h):
+        if  (platform_x_pos) <= ball_xpos <= (platform_x_pos + platform_w) and (platform_start_posy) <= ball_bot_side <= (platform_start_posy + platform_h):
             ball_ypos -= ball_speed
             GO_UP = True
         else:
@@ -196,29 +212,38 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
 
         # COLLISION WITH BLOCKS
         for tpl in blocks_positions:
-            if (tpl[0] - block_w) <= ball_xpos <= (tpl[0] + block_w) and tpl[1] <= ball_ypos <= (tpl[1] + block_h):
+            if touching_block(tpl[0],tpl[1],ball_xpos, ball_ypos):
                 blocks_positions.remove(tpl)
                 removed_blocks_lst.append(tpl)
+                update_blocks(current_block_state, removed_blocks_lst)
                 #print(f"BYE BYE {tpl}")
 
 
-        GAME_OVER = False
+        
         # IF BALL LOST
+        GAME_OVER = False
         if ball_ypos > bot_wall:
             GAME_OVER = True
+            ball_speed = 0
+
+        # IF ALL BLOCKS GONE
+        WIN = False
+        if len(current_block_state) == 0:
+            WIN = True
             ball_speed = 0
 
         # new frame update
         screen.fill(BLACK)
         #screen.blit(bg, [0, 0])
-        update_blocks(current_block_state, removed_blocks_lst)
+        draw_blocks(current_block_state)
         draw_rect(WHITE, platform_x_pos, platform_start_posy, platform_w, platform_h) # Platform
         draw_ball(ball_xpos, ball_ypos, ball_r) # Ball
-
+        
         if GAME_OVER:
             screen.blit(game_over_txt,(window_x//3.5, window_y//2))
         
-        
+        if WIN:
+            screen.blit(you_win_txt,(window_x//3.5, window_y//2))
         
 
         pygame.display.update()
