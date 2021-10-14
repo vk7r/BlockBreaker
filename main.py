@@ -9,7 +9,10 @@ import random
 # y = tpl[1]
 # pos = (x, y) 
 
-# Skapa en ball-collision funktion som funkar för både blocks och platform (går det?/onödigt?)
+# Funktion som tillåter att man kan starta om spelet vid knapptryck "r"
+
+# Skapa kollision på sidan av blocksen/plattformen
+
 
 # Initialize pygame ####################################################################################################
 pygame.init()
@@ -56,19 +59,18 @@ def draw_ball(x_pos, y_pos, radius):
 # Blocks ###################################################################################
 
 def build_level():
-    """ Creates a level of blocks with random colors """
+    """ Creates a level of blocks with random colors, returns list of blocks """
     start_x = 15
     start_y = 15
 
-    blockk_w = window_x // 10
+    blockk_w = (window_x - 40 - 30) // 10 # window_x minus luckor mellan blocks ( -(5*8) & -(15+15) )
     blockk_h = window_y // 20
 
     lst = []
 
     for y in range(4): # LOOP KAN FÖRFINAS?
-        for x in range(9):
+        for x in range(10):
             random_color = random.choice([RED, GREEN, BLUE, YELLOW, CYAN, MAGENTA])
-
             lst.append(draw_rect(random_color, start_x, start_y, blockk_w, blockk_h))
             start_x += blockk_w + 5
         
@@ -77,7 +79,6 @@ def build_level():
 
     return lst
 
-# Update Blocks:
 def update_blocks(lst_of_blocks, removed_blocks):
     """ Checks and updates changes about the blocks """
 
@@ -86,7 +87,6 @@ def update_blocks(lst_of_blocks, removed_blocks):
         for block_info in lst_of_blocks:
             if tpl[0] == block_info[1] and tpl[1] == block_info[2]:
                 lst_of_blocks.remove(block_info) # removes block
-
 
 def draw_blocks(lst_of_blocks):
     for block in lst_of_blocks:
@@ -110,7 +110,14 @@ def touching_block(x_pos, y_pos, ball_x, ball_y):
     blck_h = window_y // 20
 
     return (x_pos) <= ball_x <= (x_pos + blck_w) and y_pos <= ball_y <= (y_pos + blck_h)
-        
+
+    #return x_pos <= ball_x <= (x_pos + block_w) and ball_y == y_pos or ball_y == (y_pos + block_h)
+    # ^^ är om man ska bara träffa långsidan
+
+def touching_rect_shortside(x_pos, y_pos, rect_w, rect_h, ball_x, ball_y):
+    """ When the ball is touching the side of the blocks/platform """
+    # LEFT SIDE OF RECT
+    return y_pos <= ball_y <= (y_pos + rect_h) and x_pos > ball_x > (x_pos + rect_w)
 
 # Game engine ######################################################################################
 
@@ -118,9 +125,12 @@ def touching_block(x_pos, y_pos, ball_x, ball_y):
 FPS = 60
 
 # TEXT
-myfont = pygame.font.SysFont('Comic Sans MS', 50)
-game_over_txt = myfont.render('GAME OVER', True, WHITE)
-you_win_txt = myfont.render("YOU WIN!", True, WHITE)
+BigFont = pygame.font.SysFont('rog fonts', window_x//10)
+SmallFont = pygame.font.SysFont('consolas', window_x//20)
+
+game_over_txt = BigFont.render('GAME OVER', True, WHITE)
+you_win_txt = BigFont.render("YOU WIN!", True, WHITE)
+restart_txt = SmallFont.render('Press "r" to restart', True, WHITE)
 
 
 # WALLS
@@ -152,7 +162,7 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
 
     platform_speed = 8
 
-    ball_r = 12
+    ball_r = window_x // 65
     ball_speed = 6
 
     current_block_state = build_level() # Start layout
@@ -218,7 +228,6 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
         for tpl in blocks_positions:
             if touching_block(tpl[0],tpl[1],ball_xpos, ball_ypos):
                 GO_UP = False
-
                 blocks_positions.remove(tpl)
                 removed_blocks_lst.append(tpl)
                 update_blocks(current_block_state, removed_blocks_lst)
@@ -232,11 +241,12 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
             GAME_OVER = True
             ball_speed = 0
 
-        # IF ALL BLOCKS GONE
+        # IF ALL BLOCKS ARE DESTROYED
         WIN = False
         if len(current_block_state) == 0:
             WIN = True
             ball_speed = 0
+
 
         # new frame update
         screen.fill(BLACK)
@@ -246,10 +256,16 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
         draw_ball(ball_xpos, ball_ypos, ball_r) # Ball
         
         if GAME_OVER:
-            screen.blit(game_over_txt,(window_x//3.5, window_y//2))
+            screen.blit(game_over_txt,((window_x // 2) - (game_over_txt.get_width()//2), window_y//2))
+            screen.blit(restart_txt,((window_x // 2) - (restart_txt.get_width()//2), window_y//1.35))
+            if user_input[pygame.K_r]:
+                return True
         
         if WIN:
-            screen.blit(you_win_txt,(window_x//3.5, window_y//2))
+            screen.blit(you_win_txt,((window_x // 2) - (you_win_txt.get_width()//2), window_y//2))
+            screen.blit(restart_txt,((window_x // 2) - (restart_txt.get_width()//2), window_y//1.35))
+            if user_input[pygame.K_r]:
+                return True
         
 
         pygame.display.update()
@@ -258,6 +274,7 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
 
 
 if __name__ == '__main__':
-    
-    main(platform_start_posx, ball_start_posx, ball_start_posy)
+
+    while main(platform_start_posx, ball_start_posx, ball_start_posy):
+        main(platform_start_posx, ball_start_posx, ball_start_posy)
     
