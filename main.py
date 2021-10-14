@@ -9,6 +9,8 @@ import random
 # y = tpl[1]
 # pos = (x, y) 
 
+# Skapa en ball-collision funktion som funkar för både blocks och platform (går det?/onödigt?)
+
 # Initialize pygame ####################################################################################################
 pygame.init()
 
@@ -150,7 +152,7 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
     platform_speed = 8
 
     ball_r = 12
-    ball_speed = 8
+    ball_speed = 6
 
     current_block_state = build_level() # Start layout
     blocks_positions = block_pos_list(current_block_state) # pos-lista för alla blocks
@@ -213,6 +215,8 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
         # COLLISION WITH BLOCKS
         for tpl in blocks_positions:
             if touching_block(tpl[0],tpl[1],ball_xpos, ball_ypos):
+                GO_UP = False
+                
                 blocks_positions.remove(tpl)
                 removed_blocks_lst.append(tpl)
                 update_blocks(current_block_state, removed_blocks_lst)
