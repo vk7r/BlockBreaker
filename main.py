@@ -129,8 +129,8 @@ top_wall = 0
 bot_wall = window_y
 
 # Platform/player
-platform_w = 64
-platform_h = 8 * 1.618
+platform_w = window_x // 8
+platform_h = (window_x // 10) // 10 
 platform_start_posx = ((window_x / 2) - (platform_w / 2))
 platform_start_posy = window_y - window_y / 10
 
