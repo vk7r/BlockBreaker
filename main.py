@@ -137,7 +137,8 @@ platform_start_posx = ((window_x / 2) - (platform_w / 2))
 platform_start_posy = window_y - window_y / 10
 
 # Ball
-ball_start_posx = (window_x / 2)
+random_spawn = random.randint(left_wall, right_wall)
+ball_start_posx = (random_spawn)
 ball_start_posy = (window_y / 2)
 
 # BLOCKS
@@ -160,7 +161,8 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
     #print(current_block_state)
     #print(blocks_positions)
 
-    GO_RIGHT = True # standardvärde för att bollen åker till höger
+    random_direction = random.choice([True, False]) # Slumpar om bollen startar åt H eller V
+    GO_RIGHT = random_direction # standardvärde för att bollen åker till höger
     GO_UP = True # standardvärde för att bollen åker uppåt
 
     while loop:
@@ -216,7 +218,7 @@ def main(platform_x_pos, ball_xpos, ball_ypos):
         for tpl in blocks_positions:
             if touching_block(tpl[0],tpl[1],ball_xpos, ball_ypos):
                 GO_UP = False
-                
+
                 blocks_positions.remove(tpl)
                 removed_blocks_lst.append(tpl)
                 update_blocks(current_block_state, removed_blocks_lst)
