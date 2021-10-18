@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 
 # Initialize pygame
 pygame.init()
@@ -136,6 +137,23 @@ def UP():
 def DOWN():
     return 1
 
+# SOUNDS
+def sound_wall_bounce():
+    soundObj = pygame.mixer.Sound('sounds\click.wav')
+    soundObj.play()
+
+def sound_kill_block():
+    soundObj = pygame.mixer.Sound('sounds\pop.wav')
+    soundObj.play()
+
+def sound_game_over():
+    soundObj = pygame.mixer.Sound('sounds\gameover.wav')
+    soundObj.play()
+
+def sound_you_win():
+    soundObj = pygame.mixer.Sound('sounds\win.wav')
+    soundObj.play()
+
 # MAIN FUNCTION --------------------------------------------------
 
 def main():
@@ -163,6 +181,9 @@ def main():
     X_DIRECTION = random.choice([LEFT(), RIGHT()]) # slumpat startvärde för vilket håll bollen åker
     Y_DIRECTION = UP()
 
+    # BOOL for soundeffect
+    PLAY = True # så ljudet bara spelas en gång
+
     # GAME LOOP
     while loop:
         clock.tick(FPS)
@@ -184,14 +205,17 @@ def main():
         ball_top_side = ( ball_ypos - ball_r)
         ball_bot_side = ( ball_ypos + ball_r)
 
-        # COLLISION WITH WALL
+        # BALL MOVEMENT
         if ball_left_side <= left_wall: # Studs vänster vägg
+            #sound_wall_bounce()
             X_DIRECTION = RIGHT()
             ball_xpos += ball_speed
         elif ball_right_side >= right_wall: # Studs höger vägg
+            #sound_wall_bounce()
             X_DIRECTION = LEFT()
             ball_xpos -= ball_speed
         elif ball_top_side <= top_wall: # Studs tak
+            #sound_wall_bounce()
             Y_DIRECTION = DOWN()
             ball_ypos += ball_speed
         else:
@@ -199,7 +223,8 @@ def main():
             ball_ypos += (Y_DIRECTION * ball_speed)
 
         # COLLISION WITH PLATFORM
-        if  (platform_x_pos) <= ball_xpos <= (platform_x_pos + platform_w) and (platform_start_posy) <= ball_bot_side <= (platform_start_posy + platform_h):
+        if  (platform_x_pos) <= ball_xpos <= (platform_x_pos + platform_w) and (platform_start_posy) <= ball_bot_side <= (platform_start_posy + platform_h): 
+            #sound_wall_bounce() #spelas flera gånger då bollen e kvar på plattformen nästa iteration
             Y_DIRECTION = UP()
             ball_ypos += (Y_DIRECTION * ball_speed)
 
@@ -207,6 +232,7 @@ def main():
         # COLLISION WITH BLOCKS
         for tpl in blocks_positions:
             if touching_block(tpl[0],tpl[1],ball_xpos, ball_ypos):
+                sound_kill_block()
                 Y_DIRECTION = DOWN()
                 ball_ypos += (Y_DIRECTION * ball_speed)
                 blocks_positions.remove(tpl)
@@ -223,6 +249,10 @@ def main():
         
         # IF LOSE (If ball lost)
         if ball_ypos > bot_wall:
+            if PLAY:
+                sound_game_over()
+                PLAY = False
+                
             ball_speed = 0
             screen.blit(game_over_txt,((window_x // 2) - (game_over_txt.get_width()//2), (window_y//2) - (game_over_txt.get_height()//2) ))
             screen.blit(restart_txt,((window_x // 2) - (restart_txt.get_width()//2), window_y//1.5))
@@ -231,6 +261,10 @@ def main():
 
         # IF WIN (If all blocks are destroyed)
         if len(current_block_state) == 0:
+            if PLAY:
+                sound_you_win()
+                PLAY = False
+
             ball_speed = 0
             screen.blit(you_win_txt,((window_x // 2) - (you_win_txt.get_width()//2), (window_y//2) - ((you_win_txt.get_height()//2)) ))
             screen.blit(restart_txt,((window_x // 2) - (restart_txt.get_width()//2), window_y//1.5))
