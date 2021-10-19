@@ -91,7 +91,7 @@ def build_level():
         
         start_x = 15 # Nollställer
         start_y += block_h + 5 # FLYTTA NED EFTER FULL RAD
-        c -= 50
+        c -= 75 # FÅR EJ ÖVERSTIGA 85 då RBG-värdet blir < 0
 
     return lst
 
