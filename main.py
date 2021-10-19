@@ -69,10 +69,6 @@ ball_r = window_x // 65
 
 # FUNCTIONS --------------------------------------------------
 
-# DRAW RECTANGLE
-def draw_rect(color, pos_x, pos_y, rect_w, rect_h):
-    pygame.draw.rect(screen, color, pygame.Rect(pos_x, pos_y, rect_w, rect_h))
-
 # DRAW BALL
 def draw_ball(x_pos, y_pos, radius):
     pygame.draw.circle(screen, WHITE, (x_pos, y_pos), radius, 0)
@@ -85,14 +81,17 @@ def build_level():
 
     lst = []
 
+    c = 255
     for y in range(4):
         for x in range(10):
-            random_color = random.choice([RED, GREEN, BLUE, YELLOW, CYAN, MAGENTA])
-            lst.append( (random_color, start_x, start_y, block_w, block_h) )
+            # random_color = random.choice([ (255, c, 80), (255, 100, c), (c, 255, 80)] )
+            # random_color = random.choice([RED, GREEN, BLUE, YELLOW, CYAN, MAGENTA])
+            lst.append( ((255, c, 100 ), start_x, start_y, block_w, block_h) )
             start_x += block_w + 5
         
         start_x = 15 # Nollställer
         start_y += block_h + 5 # FLYTTA NED EFTER FULL RAD
+        c -= 50
 
     return lst
 
@@ -109,7 +108,7 @@ def update_blocks(lst_of_blocks, removed_blocks):
 def draw_living_blocks(lst_of_blocks):
     """ Draws the remaining blocks """
     for block in lst_of_blocks:
-        draw_rect(block[0], block[1], block[2], block[3], block[4])
+        pygame.draw.rect(screen, block[0], pygame.Rect(block[1], block[2], block[3], block[4]))
         # indx: 0 = RGB, 1 = x_pos, 2 = y_pos, 3 = block_w, 4 = block_h
 
 def block_pos_list(block_lst):
@@ -199,7 +198,7 @@ def main():
             platform_x_pos += platform_speed
 
         #BALL COLLISION:
-        ball_left_side = (ball_xpos - ball_r) # + ball_speed ?
+        ball_left_side = (ball_xpos - ball_r)
         ball_right_side = (ball_xpos + ball_r)
 
         ball_top_side = ( ball_ypos - ball_r)
@@ -244,7 +243,7 @@ def main():
         screen.fill(BLACK)
         #screen.blit(bg, [0, 0])
         draw_living_blocks(current_block_state)
-        draw_rect(WHITE, platform_x_pos, platform_start_posy, platform_w, platform_h) # Platform
+        pygame.draw.rect(screen, WHITE, pygame.Rect(platform_x_pos, platform_start_posy, platform_w, platform_h))
         draw_ball(ball_xpos, ball_ypos, ball_r) # Ball
         
         # IF LOSE (If ball lost)
