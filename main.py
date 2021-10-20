@@ -1,6 +1,6 @@
 import pygame
 import random
-import time
+from sound_effects import *
 
 # Initialize pygame
 pygame.init()
@@ -126,6 +126,9 @@ def block_pos_list(block_lst):
 def touching_block(x_pos, y_pos, ball_x, ball_y):
     return (x_pos) <= ball_x <= (x_pos + block_w) and y_pos <= ball_y <= (y_pos + block_h)
 
+def touching_platform(plat_x_pos, ball_x, ball_y_bottom):
+    return (plat_x_pos) <= ball_x <= (plat_x_pos + platform_w) and (platform_start_posy) <= ball_y_bottom <= (platform_start_posy + platform_h)
+
 # DIRECTION OF BALL
 def RIGHT(): # 
     return 1
@@ -136,22 +139,6 @@ def UP():
 def DOWN():
     return 1
 
-# SOUNDS
-def sound_wall_bounce():
-    soundObj = pygame.mixer.Sound('sounds\click.wav')
-    soundObj.play()
-
-def sound_kill_block():
-    soundObj = pygame.mixer.Sound('sounds\pop.wav')
-    soundObj.play()
-
-def sound_game_over():
-    soundObj = pygame.mixer.Sound('sounds\gameover.wav')
-    soundObj.play()
-
-def sound_you_win():
-    soundObj = pygame.mixer.Sound('sounds\win.wav')
-    soundObj.play()
 
 # MAIN FUNCTION --------------------------------------------------
 
@@ -206,15 +193,12 @@ def main():
 
         # BALL MOVEMENT
         if ball_left_side <= left_wall: # Studs vänster vägg
-            #sound_wall_bounce()
             X_DIRECTION = RIGHT()
             ball_xpos += ball_speed
         elif ball_right_side >= right_wall: # Studs höger vägg
-            #sound_wall_bounce()
             X_DIRECTION = LEFT()
             ball_xpos -= ball_speed
         elif ball_top_side <= top_wall: # Studs tak
-            #sound_wall_bounce()
             Y_DIRECTION = DOWN()
             ball_ypos += ball_speed
         else:
@@ -222,8 +206,7 @@ def main():
             ball_ypos += (Y_DIRECTION * ball_speed)
 
         # COLLISION WITH PLATFORM
-        if  (platform_x_pos) <= ball_xpos <= (platform_x_pos + platform_w) and (platform_start_posy) <= ball_bot_side <= (platform_start_posy + platform_h): 
-            #sound_wall_bounce() #spelas flera gånger då bollen e kvar på plattformen nästa iteration
+        if touching_platform(platform_x_pos, ball_xpos, ball_bot_side): 
             Y_DIRECTION = UP()
             ball_ypos += (Y_DIRECTION * ball_speed)
 
