@@ -43,7 +43,7 @@ SmallFont = pygame.font.SysFont('consolas', window_x//20)
 # Texts
 game_over_txt = BigFont.render('GAME OVER', True, WHITE)
 you_win_txt = BigFont.render("YOU WIN!", True, WHITE)
-restart_txt = SmallFont.render('Press "r" to restart', True, WHITE)
+restart_txt = SmallFont.render('Press R to restart', True, WHITE)
 
 # BLOCKS
 block_w = (window_x - 40 - 30) // 10 # window_x minus luckor mellan blocks ( -(5*8) & -(15+15) )
@@ -82,16 +82,15 @@ def build_level():
     lst = []
 
     c = 255
-    for y in range(4):
+    n = 4
+    for y in range(n):
         for x in range(10):
-            # random_color = random.choice([ (255, c, 80), (255, 100, c), (c, 255, 80)] )
-            # random_color = random.choice([RED, GREEN, BLUE, YELLOW, CYAN, MAGENTA])
             lst.append( ((255, c, 100 ), start_x, start_y, block_w, block_h) )
             start_x += block_w + 5
         
         start_x = 15 # Nollställer
         start_y += block_h + 5 # FLYTTA NED EFTER FULL RAD
-        c -= 75 # FÅR EJ ÖVERSTIGA 85 då RBG-värdet blir < 0
+        c -= 255//n 
 
     return lst
 
@@ -139,7 +138,7 @@ def UP():
 def DOWN():
     return 1
 
-
+22
 # MAIN FUNCTION --------------------------------------------------
 
 def main():
